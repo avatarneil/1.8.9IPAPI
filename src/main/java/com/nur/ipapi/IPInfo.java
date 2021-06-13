@@ -4,6 +4,12 @@ import com.google.gson.JsonObject;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
 
+enum Risk {
+    Low,
+    Medium,
+    High
+}
+
 public class IPInfo {
     private Integer fraudScore;
     private Boolean proxy;
@@ -19,48 +25,76 @@ public class IPInfo {
 
     /**
      *
-     * @param apiResponse
-     * @return 0=good, 1=warn, 2=bad
+     * @return How risky a given IP is considered
      */
-    private Integer determineRiskThreshold(JsonObject apiResponse) {
-        fraudScore = apiResponse.get("fraud_score").getAsInt();
-        proxy = apiResponse.get("proxy").getAsBoolean();
-        vpn = apiResponse.get("vpn").getAsBoolean();
-        tor = apiResponse.get("tor").getAsBoolean();
-        activeVpn = apiResponse.get("active_vpn").getAsBoolean();
-        activeTor = apiResponse.get("active_tor").getAsBoolean();
+    public Risk risk() {
+        // TODO: Add support for IPHubAPI risk assessment
 
         // See fraud_score lookup table in https://www.ipqualityscore.com/documentation/proxy-detection/overview
         if (fraudScore >= 85) {
-            return 2;
+            return Risk.High;
         }
         if (fraudScore >= 70) {
-            return 1;
+            return Risk.Medium;
         }
         if (proxy || vpn || tor || activeVpn || activeTor) {
-            return 2;
+            return Risk.High;
         }
 
-        return 0;
+        return Risk.Low;
+    }
+
+    private EnumChatFormatting riskColor() {
+        switch (risk()) {
+            case Low:
+                return EnumChatFormatting.GREEN;
+            case Medium:
+                return EnumChatFormatting.GOLD;
+            case High:
+                return EnumChatFormatting.RED;
+            default:
+                return EnumChatFormatting.RED;
+        }
+    }
+
+    public ChatComponentText prepareRiskForDisplay() {
+        String typePrefix = "" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Risk: ";
+
+        switch (risk()) {
+            case Low:
+                return new ChatComponentText(typePrefix + EnumChatFormatting.GREEN + "Good ✔");
+            case Medium:
+                return new ChatComponentText(typePrefix + EnumChatFormatting.GOLD + "Suspicious ¿");
+            case High:
+                return new ChatComponentText(typePrefix + EnumChatFormatting.RED + "Bad ❌");
+            default:
+                return new ChatComponentText(typePrefix + EnumChatFormatting.RED + "Error assessing risk");
+        }
     }
 
     /**
-     * @param color Color styling for the chat component
      * @return Formatted lat/lng info
      */
-    public ChatComponentText prepareCoordinatesForDisplay(EnumChatFormatting color) {
-        return new ChatComponentText("" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Lat/Lng: " + color + "(" + lat + ", " + lng + ")");
+    public ChatComponentText prepareCoordinatesForDisplay() {
+        String latLngPrefix = "" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Lat/Lng: ";
+        return new ChatComponentText(latLngPrefix + riskColor() + "(" + lat + ", " + lng + ")");
     }
 
     /**
-     * @param color Color styling for the chat component
      * @return Formatted city/region/country info
      */
-    public ChatComponentText prepareLocationForDisplay(EnumChatFormatting color) {
-        return new ChatComponentText("" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Region: " + color+ city + ", " + region + " " + countryCode);
+    public ChatComponentText prepareLocationForDisplay() {
+        String locationPrefix = "" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Region: ";
+        return new ChatComponentText(locationPrefix + riskColor() + city + ", " + region + " " + countryCode);
     }
 
     IPInfo(JsonObject raw) {
+        fraudScore = raw.get("fraud_score").getAsInt();
+        proxy = raw.get("proxy").getAsBoolean();
+        vpn = raw.get("vpn").getAsBoolean();
+        tor = raw.get("tor").getAsBoolean();
+        activeVpn = raw.get("active_vpn").getAsBoolean();
+        activeTor = raw.get("active_tor").getAsBoolean();
         lat = raw.get("latitude").getAsDouble();
         lng = raw.get("longitude").getAsDouble();
         countryCode = raw.get("country_code").getAsString();

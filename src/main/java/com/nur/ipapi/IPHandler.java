@@ -7,7 +7,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class IPHandler {
-    public final static Map<InetAddress, IPHubResult> ipCache = new HashMap<InetAddress, IPHubResult>();
+    public final static Map<InetAddress, IPInfo> ipCache = new HashMap<InetAddress, IPInfo>();
 
     public static boolean isCached(InetAddress ip) {
         return ipCache.containsKey(ip);
@@ -22,11 +22,11 @@ public class IPHandler {
         }
     }
 
-    public static IPHubResult getCached(InetAddress ip) {
+    public static IPInfo getCached(InetAddress ip) {
         return ipCache.get(ip);
     }
 
-    public static IPHubResult getCached(String ip) {
+    public static IPInfo getCached(String ip) {
         try {
             return ipCache.get(Inet4Address.getByName(ip));
         } catch (UnknownHostException e) {
@@ -35,11 +35,11 @@ public class IPHandler {
         }
     }
 
-    public static void cache(InetAddress ip, IPHubResult result) {
+    public static void cache(InetAddress ip, IPInfo result) {
         ipCache.put(ip, result);
     }
 
-    public static void cache(String ip, IPHubResult result) {
+    public static void cache(String ip, IPInfo result) {
         try {
             cache(Inet4Address.getByName(ip), result);
         } catch (UnknownHostException e) {

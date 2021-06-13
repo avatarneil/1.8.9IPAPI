@@ -101,27 +101,9 @@ public class IPInfoCommand implements ICommand {
                         IPInfo parsedInfo = new IPInfo(j);
                         Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + "(!) " + EnumChatFormatting.WHITE + "IP Information: " + EnumChatFormatting.RED + IP).setChatStyle(style));
 
-
-                        // Determine good vs bad
-                        switch (determineRiskThreshold(j)) {
-                            case 0:
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(parsedInfo.prepareLocationForDisplay(EnumChatFormatting.GREEN));
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(parsedInfo.prepareCoordinatesForDisplay(EnumChatFormatting.GREEN));
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Type: " + EnumChatFormatting.GREEN + "Good").setChatStyle(style));
-                                break;
-                            case 1:
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(parsedInfo.prepareLocationForDisplay(EnumChatFormatting.YELLOW));
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(parsedInfo.prepareCoordinatesForDisplay(EnumChatFormatting.YELLOW));
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Type: " + EnumChatFormatting.YELLOW + "Mixed").setChatStyle(style));
-                                break;
-                            case 2:
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(parsedInfo.prepareLocationForDisplay(EnumChatFormatting.RED));
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(parsedInfo.prepareCoordinatesForDisplay(EnumChatFormatting.RED));
-                                Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Type: " + EnumChatFormatting.RED + "Bad").setChatStyle(style));
-                                break;
-                            default:
-                                //Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("" + EnumChatFormatting.RED + EnumChatFormatting.BOLD + "(!) " + EnumChatFormatting.RED + "Error while scanning " + m.group(0)).setChatStyle(style));
-                        }
+                        Minecraft.getMinecraft().thePlayer.addChatMessage(parsedInfo.prepareLocationForDisplay());
+                        Minecraft.getMinecraft().thePlayer.addChatMessage(parsedInfo.prepareCoordinatesForDisplay());
+                        Minecraft.getMinecraft().thePlayer.addChatMessage(parsedInfo.prepareRiskForDisplay().setChatStyle(style));
 
                         String countryName = j.get("countryName").getAsString();
                         if ("ZZ".equals(countryName)) countryName = "Planet Earth";

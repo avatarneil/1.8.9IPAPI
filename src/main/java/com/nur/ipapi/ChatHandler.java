@@ -81,9 +81,9 @@ public class ChatHandler {
                 //ChatStyle style = new ChatStyle().setChatClickEvent(new ClickEvent(Action.OPEN_URL, "https://iphub.info/?ip="+IP));
                 final ChatStyle style = new ChatStyle().setChatClickEvent(new ClickEvent(Action.SUGGEST_COMMAND, "/alts " + IP));
                 if (IPHandler.isCached(IP)) {
-                    IPHubResult cachedResult = IPHandler.getCached(IP);
+                    IPInfo cachedResult = IPHandler.getCached(IP);
                     if (cachedResult != null) {
-                        event.message.appendSibling(new ChatComponentText(" " + cachedResult.getFormattedStringWithParentheses()));
+                        event.message.appendSibling(cachedResult.prepareRiskForDisplay());
                         event.message.setChatStyle(style);
                         return;
                     }
@@ -108,15 +108,11 @@ public class ChatHandler {
                     }
                     JsonObject j = parser.parse(response.toString()).getAsJsonObject();
 
-                    int riskThreshold = determineRiskThreshold(j);
-                    IPHubResult result = IPHubResult.fromBlock(riskThreshold);
-                    if (result == null)
-                        Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("" + EnumChatFormatting.RED + EnumChatFormatting.BOLD + "(!) " + EnumChatFormatting.RED + "Error while scanning " + IP).setChatStyle(style));
-                    else {
-                        event.message.appendSibling(new ChatComponentText(" " + result.getFormattedStringWithParentheses()));
-                        event.message.setChatStyle(style);
-                        IPHandler.cache(IP, result);
-                    }
+                    IPInfo parsedInfo = new IPInfo(j);
+                    event.message.appendSibling(parsedInfo.prepareRiskForDisplay());
+                    event.message.setChatStyle(style);
+                    IPHandler.cache(IP, parsedInfo);
+
                 } catch (Exception ex) {
                     try {
                         BufferedReader in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
