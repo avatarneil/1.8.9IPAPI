@@ -1,5 +1,6 @@
 package com.nur.ipapi;
 
+import com.google.common.base.Joiner;
 import com.google.gson.JsonObject;
 import net.minecraft.util.ChatComponentText;
 import net.minecraft.util.EnumChatFormatting;
@@ -34,10 +35,8 @@ public class IPInfo {
         if (fraudScore >= 85) {
             return Risk.High;
         }
-        if (proxy || vpn || tor || activeVpn || activeTor) {
-            return Risk.High;
-        }
-        if (fraudScore >= 70) {
+
+        if (fraudScore >= 50) {
             return Risk.Medium;
         }
 
@@ -57,16 +56,32 @@ public class IPInfo {
         }
     }
 
+    private String riskDetails() {
+        String proxyStr = proxy ? "Proxy" : null;
+        String vpnStr = vpn ? "VPN" : null;
+        String torStr = tor ? "Tor" : null;
+        String activeVpnStr = activeVpn ? "Active VPN" : null;
+        String activeTorStr = activeTor ? "Active TOR" : null;
+
+        String details = Joiner.on('/').skipNulls().join(proxyStr, vpnStr, torStr, activeVpnStr, activeTorStr);
+
+        if (details == "") {
+            return "None";
+        }
+
+        return details;
+    }
+
     public ChatComponentText prepareRiskForDisplay() {
-        String typePrefix = "" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Risk: ";
+        String typePrefix = "" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Risk(s): ";
 
         switch (risk()) {
             case Low:
-                return new ChatComponentText(typePrefix + EnumChatFormatting.GREEN + "Good");
+                return new ChatComponentText(typePrefix + EnumChatFormatting.GREEN + riskDetails());
             case Medium:
-                return new ChatComponentText(typePrefix + EnumChatFormatting.GOLD + "Suspicious");
+                return new ChatComponentText(typePrefix + EnumChatFormatting.GOLD + riskDetails());
             case High:
-                return new ChatComponentText(typePrefix + EnumChatFormatting.RED + "Bad");
+                return new ChatComponentText(typePrefix + EnumChatFormatting.RED + riskDetails());
             default:
                 return new ChatComponentText(typePrefix + EnumChatFormatting.RED + "Error assessing risk");
         }
