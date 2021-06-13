@@ -45,19 +45,19 @@ public class IPInfo {
     }
 
     /**
-     *
+     * @param color Color styling for the chat component
      * @return Formatted lat/lng info
      */
-    public ChatComponentText prepareCoordinatesForDisplay() {
-        return new ChatComponentText("" + EnumChatFormatting.DARK_BLUE + "lat: " + lat + ", lng: " + lng);
+    public ChatComponentText prepareCoordinatesForDisplay(EnumChatFormatting color) {
+        return new ChatComponentText("" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Lat/Lng: " + color + "(" + lat + ", " + lng + ")");
     }
 
     /**
-     *
+     * @param color Color styling for the chat component
      * @return Formatted city/region/country info
      */
-    public ChatComponentText prepareLocationForDisplay() {
-        return new ChatComponentText("" + EnumChatFormatting.BLUE + city + "/" + region + "/" + countryCode);
+    public ChatComponentText prepareLocationForDisplay(EnumChatFormatting color) {
+        return new ChatComponentText("" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Region: " + color+ city + ", " + region + " " + countryCode);
     }
 
     IPInfo(JsonObject raw) {
