@@ -65,7 +65,7 @@ public class IPInfo {
 
         String details = Joiner.on('/').skipNulls().join(proxyStr, vpnStr, torStr, activeVpnStr, activeTorStr);
 
-        if (details == "") {
+        if (!(details.length() > 0)) {
             return "None";
         }
 
