@@ -12,20 +12,30 @@ public class Main {
     public static final String NAME = "IP API";
     public static final String VERSION = "1.1";
 
-    public static String apiKey = "";
+    public static String ipHubApiKey = "";
+    public static String ipQsApiKey = "";
     public static boolean apiKeyNotSetWarningSent = false;
 
     public static void setAPIKey(String arg) {
-        apiKey = arg;
-        ConfigHandler.setString("api", "key", arg);
+        ipHubApiKey = arg;
+        ConfigHandler.setString("api.ipHub", "key", arg);
+    }
+
+    public static void setIPQSApiKey(String arg) {
+        ipQsApiKey = arg;
+        ConfigHandler.setString("api.ipQs", "key", arg);
     }
 
     @EventHandler
     public void init(FMLInitializationEvent event) {
         MinecraftForge.EVENT_BUS.register(new ChatHandler());
+        
         ClientCommandHandler.instance.registerCommand(new IPInfoCommand());
         ClientCommandHandler.instance.registerCommand(new ToggleIPCheckCommand());
         ClientCommandHandler.instance.registerCommand(new SetIPHubKeyCommand());
-        apiKey = ConfigHandler.getString("api", "key", "");
+        ClientCommandHandler.instance.registerCommand(new SetIPQSKeyCommand());
+
+        ipHubApiKey = ConfigHandler.getString("api.ipHub", "key", "");
+        ipQsApiKey = ConfigHandler.getString("api.ipQs", "key", "");
     }
 }

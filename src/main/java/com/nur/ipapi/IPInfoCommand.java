@@ -82,7 +82,7 @@ public class IPInfoCommand implements ICommand {
                 public void run() {
                     HttpURLConnection con = null;
                     try {
-                        URL url = new URL("https://ipqualityscore.com/api/json/ip" + "/" + Main.apiKey + "/" + IP);
+                        URL url = new URL("https://ipqualityscore.com/api/json/ip" + "/" + Main.ipQsApiKey + "/" + IP);
                         con = (HttpURLConnection) url.openConnection();
                         con.setRequestMethod("GET");
                         con.setRequestProperty("User-Agent", "Mozilla/5.0");

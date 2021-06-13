@@ -70,7 +70,7 @@ public class ChatHandler {
             Pattern IP_PATTERN = Pattern.compile(IP_REGEXP);
             Matcher m = IP_PATTERN.matcher(msg);
             if (m.find()) {
-                if ("".equals(Main.apiKey)) {
+                if ("".equals(Main.ipQsApiKey)) {
                     if (!Main.apiKeyNotSetWarningSent) {
                         event.message.appendSibling(new ChatComponentText(EnumChatFormatting.DARK_RED + " (API Key not set)")).setChatStyle(new ChatStyle().setChatClickEvent(new ClickEvent(Action.SUGGEST_COMMAND, "/setiphubkey ")));
                         Main.apiKeyNotSetWarningSent = true;
@@ -90,7 +90,7 @@ public class ChatHandler {
                 }
                 HttpURLConnection con = null;
                 try {
-                    URL url = new URL("https://ipqualityscore.com/api/json/ip" + "/" + Main.apiKey + "/" + IP);
+                    URL url = new URL("https://ipqualityscore.com/api/json/ip" + "/" + Main.ipQsApiKey + "/" + IP);
                     con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("GET");
                     con.setRequestProperty("User-Agent", "Mozilla/5.0");

@@ -34,11 +34,11 @@ public class IPInfo {
         if (fraudScore >= 85) {
             return Risk.High;
         }
-        if (fraudScore >= 70) {
-            return Risk.Medium;
-        }
         if (proxy || vpn || tor || activeVpn || activeTor) {
             return Risk.High;
+        }
+        if (fraudScore >= 70) {
+            return Risk.Medium;
         }
 
         return Risk.Low;
