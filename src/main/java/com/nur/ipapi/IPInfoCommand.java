@@ -38,6 +38,33 @@ public class IPInfoCommand implements ICommand {
         return new ArrayList<String>();
     }
 
+    /**
+     *
+     * @param apiResponse
+     * @return 0=good, 1=warn, 2=bad
+     */
+    private Integer determineRiskThreshold(JsonObject apiResponse) {
+        Integer fraudScore = apiResponse.get("fraud_score").getAsInt();
+        Boolean proxy = apiResponse.get("proxy").getAsBoolean();
+        Boolean vpn = apiResponse.get("vpn").getAsBoolean();
+        Boolean tor = apiResponse.get("tor").getAsBoolean();
+        Boolean activeVpn = apiResponse.get("active_vpn").getAsBoolean();
+        Boolean activeTor = apiResponse.get("active_tor").getAsBoolean();
+
+        // See fraud_score lookup table in https://www.ipqualityscore.com/documentation/proxy-detection/overview
+        if (fraudScore >= 85) {
+            return 2;
+        }
+        if (fraudScore >= 70) {
+            return 1;
+        }
+        if (proxy || vpn || tor || activeVpn || activeTor) {
+            return 2;
+        }
+
+        return 0;
+    }
+
     @Override
     public void processCommand(ICommandSender sender, String[] args) {
         if (args.length == 0) {
@@ -55,11 +82,10 @@ public class IPInfoCommand implements ICommand {
                 public void run() {
                     HttpURLConnection con = null;
                     try {
-                        URL url = new URL("http://v2.api.iphub.info/ip/" + IP);
+                        URL url = new URL("https://ipqualityscore.com/api/json/ip" + "/" + Main.apiKey + "/" + IP);
                         con = (HttpURLConnection) url.openConnection();
                         con.setRequestMethod("GET");
                         con.setRequestProperty("User-Agent", "Mozilla/5.0");
-                        con.addRequestProperty("X-Key", Main.apiKey);
                         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                         String inputLine;
                         StringBuilder response = new StringBuilder();
@@ -72,9 +98,14 @@ public class IPInfoCommand implements ICommand {
                             return;
                         }
                         JsonObject j = ChatHandler.parser.parse(response.toString()).getAsJsonObject();
+                        IPInfo parsedInfo = new IPInfo(j);
                         Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + "(!) " + EnumChatFormatting.WHITE + "IP Information: " + EnumChatFormatting.RED + IP).setChatStyle(style));
 
-                        switch (j.get("block").getAsInt()) {
+                        Minecraft.getMinecraft().thePlayer.addChatMessage(parsedInfo.prepareLocationForDisplay());
+                        Minecraft.getMinecraft().thePlayer.addChatMessage(parsedInfo.prepareCoordinatesForDisplay());
+
+                        // Determine good vs bad
+                        switch (determineRiskThreshold(j)) {
                             case 0:
                                 Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("" + EnumChatFormatting.WHITE + EnumChatFormatting.BOLD + " * " + EnumChatFormatting.GRAY + "Type: " + EnumChatFormatting.GREEN + "Good").setChatStyle(style));
                                 break;

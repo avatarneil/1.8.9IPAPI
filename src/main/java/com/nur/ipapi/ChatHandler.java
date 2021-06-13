@@ -33,6 +33,33 @@ public class ChatHandler {
         return true;
     }
 
+    /**
+     *
+     * @param apiResponse
+     * @return 0=good, 1=warn, 2=bad
+     */
+    private Integer determineRiskThreshold(JsonObject apiResponse) {
+        Integer fraudScore = apiResponse.get("fraud_score").getAsInt();
+        Boolean proxy = apiResponse.get("proxy").getAsBoolean();
+        Boolean vpn = apiResponse.get("vpn").getAsBoolean();
+        Boolean tor = apiResponse.get("tor").getAsBoolean();
+        Boolean activeVpn = apiResponse.get("active_vpn").getAsBoolean();
+        Boolean activeTor = apiResponse.get("active_tor").getAsBoolean();
+
+        // See fraud_score lookup table in https://www.ipqualityscore.com/documentation/proxy-detection/overview
+        if (fraudScore >= 85) {
+            return 1;
+        }
+        if (fraudScore >= 70) {
+            return 2;
+        }
+        if (proxy || vpn || tor || activeVpn || activeTor) {
+            return 1;
+        }
+
+        return 0;
+    }
+
     @SubscribeEvent
     public void onOtherChat(ClientChatReceivedEvent event) {
         if (!toggled) return;
@@ -63,11 +90,10 @@ public class ChatHandler {
                 }
                 HttpURLConnection con = null;
                 try {
-                    URL url = new URL("http://v2.api.iphub.info/ip/" + IP);
+                    URL url = new URL("https://ipqualityscore.com/api/json/ip" + "/" + Main.apiKey + "/" + IP);
                     con = (HttpURLConnection) url.openConnection();
                     con.setRequestMethod("GET");
                     con.setRequestProperty("User-Agent", "Mozilla/5.0");
-                    con.addRequestProperty("X-Key", Main.apiKey);
                     BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
                     String inputLine;
                     StringBuilder response = new StringBuilder();
@@ -82,8 +108,8 @@ public class ChatHandler {
                     }
                     JsonObject j = parser.parse(response.toString()).getAsJsonObject();
 
-                    int blockInt = j.get("block").getAsInt();
-                    IPHubResult result = IPHubResult.fromBlock(blockInt);
+                    int riskThreshold = determineRiskThreshold(j);
+                    IPHubResult result = IPHubResult.fromBlock(riskThreshold);
                     if (result == null)
                         Minecraft.getMinecraft().thePlayer.addChatMessage(new ChatComponentText("" + EnumChatFormatting.RED + EnumChatFormatting.BOLD + "(!) " + EnumChatFormatting.RED + "Error while scanning " + IP).setChatStyle(style));
                     else {
