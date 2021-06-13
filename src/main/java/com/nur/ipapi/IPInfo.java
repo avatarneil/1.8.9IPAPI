@@ -62,11 +62,11 @@ public class IPInfo {
 
         switch (risk()) {
             case Low:
-                return new ChatComponentText(typePrefix + EnumChatFormatting.GREEN + "Good ✔");
+                return new ChatComponentText(typePrefix + EnumChatFormatting.GREEN + "Good");
             case Medium:
-                return new ChatComponentText(typePrefix + EnumChatFormatting.GOLD + "Suspicious ¿");
+                return new ChatComponentText(typePrefix + EnumChatFormatting.GOLD + "Suspicious");
             case High:
-                return new ChatComponentText(typePrefix + EnumChatFormatting.RED + "Bad ❌");
+                return new ChatComponentText(typePrefix + EnumChatFormatting.RED + "Bad");
             default:
                 return new ChatComponentText(typePrefix + EnumChatFormatting.RED + "Error assessing risk");
         }
